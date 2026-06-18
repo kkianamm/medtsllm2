@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 import torch
+import torch.nn.functional as F
 from sklearn.preprocessing import StandardScaler
 
 from .base import BaseDataset
@@ -57,23 +58,26 @@ class ClassificationDataset(BaseDataset, ABC):
         records = self.normalizer.transform(records.reshape(n * t, f)).reshape(n, t, f)
         return records
 
-    def crop_or_pad(self, x):
-        """Center-crop (or front-pad) a recording to history_len."""
+    def resample_to_history(self, x):
+        """Resample a recording to history_len along the time axis.
+
+        Unlike center-cropping, this keeps the entire recording (the whole
+        10 s / 1000-sample strip) and just changes its temporal resolution,
+        which preserves diagnostic morphology spread across the full signal.
+        """
         t = x.size(0)
         h = self.history_len
         if t == h:
             return x
-        if t > h:
-            start = (t - h) // 2
-            return x[start:start + h, :]
-        pad = torch.zeros(h - t, x.size(1), dtype=x.dtype)
-        return torch.cat([pad, x], dim=0)
+        x = x.transpose(0, 1).unsqueeze(0)                          # [1, F, T]
+        x = F.interpolate(x, size=h, mode="linear", align_corners=False)
+        return x.squeeze(0).transpose(0, 1)                         # [h, F]
 
     def __len__(self):
         return self.records.size(0)
 
     def __getitem__(self, idx):
-        x = self.crop_or_pad(self.records[idx])       # [history_len, F]
+        x = self.resample_to_history(self.records[idx])  # [history_len, F]
         y = self.record_labels[idx]                   # scalar long
 
         out = {"x_enc": x, "labels": y}
