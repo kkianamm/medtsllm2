@@ -1,0 +1,28 @@
+# python
+__pycache__/
+.env/
+.venv/
+venv/
+
+# jupyter
+*.ipynb
+.ipynb_checkpoints/
+
+# data
+data/
+inputs/
+
+# logs
+outputs/
+logs/
+wandb/
+
+# backup
+backup/
+*.bak
+
+# other
+.DS_Store
+tmp/
+.vscode/
+todo.md
