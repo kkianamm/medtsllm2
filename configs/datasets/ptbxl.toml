@@ -22,7 +22,7 @@ optimizer = "adam"
 learning_rate = 1e-4
 dropout = 0.1
 loss = "ce"
-class_weights = false
+class_weights = true
 
 eval_metric = "accuracy"
 eval_metric_direction = "max"
