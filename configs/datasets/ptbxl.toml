@@ -24,7 +24,7 @@ dropout = 0.1
 loss = "ce"
 class_weights = false
 
-eval_metric = "f1"
+eval_metric = "accuracy"
 eval_metric_direction = "max"
 
 
